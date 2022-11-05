@@ -20,18 +20,18 @@ export class Game {
     this.ctx = this.canvas.getContext('2d')!;
     this.rows = Math.trunc(this.canvas.width / GameObject.size);
     this.columns = Math.trunc(this.canvas.height / GameObject.size);
-    const [head, body, tail] = this.createSnake();
+    const [head, body, tail] = this.createSnakeAtStart();
     this.snakeHead = head;
-    this.snakeBody = [body];
+    this.snakeBody = body;
     this.snakeTail = tail;
     this.direction = Direction.Right;
     this.startGameLoop();
   }
 
   restart() {
-    const [head, body, tail] = this.createSnake();
+    const [head, body, tail] = this.createSnakeAtStart();
     this.snakeHead = head;
-    this.snakeBody = [body];
+    this.snakeBody = body;
     this.snakeTail = tail;
     this.direction = Direction.Right;
   }
@@ -72,15 +72,11 @@ export class Game {
     window.setInterval(() => {
       this.move();
       this.draw();
-    }, 1000);
+    }, 200);
   }
 
   private move() {
-    this.snakeHead.move();
-    this.snakeBody.forEach((x) => {
-      x.move();
-    });
-    this.snakeTail.move();
+    this.createNewSnake();
   }
 
   private draw() {
@@ -92,20 +88,78 @@ export class Game {
     this.snakeTail.draw(this.ctx);
   }
 
-  private createSnake(): [DynamicObject, DynamicObject, DynamicObject] {
+  private createSnakeAtStart(): [
+    DynamicObject,
+    DynamicObject[],
+    DynamicObject
+  ] {
     const bodyX = Math.trunc(this.columns / 2);
     const headX = bodyX + 1;
-    const tailX = bodyX - 1;
+    const tailX = bodyX - 3;
     const snakeY = Math.trunc(this.rows / 2);
     const head = this.createHead(headX, snakeY, Direction.Right);
-    const body = this.createBody(
-      bodyX,
-      snakeY,
-      Direction.Right,
-      Direction.Right
-    );
+    const body = [
+      this.createBody(bodyX, snakeY, Direction.Right, Direction.Right),
+      this.createBody(bodyX - 1, snakeY, Direction.Right, Direction.Right),
+      this.createBody(bodyX - 2, snakeY, Direction.Right, Direction.Right),
+    ];
     const tail = this.createTail(tailX, snakeY, Direction.Right);
     return [head, body, tail];
+  }
+
+  private createNewSnake() {
+    const newHead = this.createNewHead();
+    const newBody = this.createNewBody();
+    const newTail = this.createNewTail();
+    this.snakeHead = newHead;
+    this.snakeBody = newBody;
+    this.snakeTail = newTail;
+  }
+
+  private createNewHead() {
+    let x = this.snakeHead.getX();
+    let y = this.snakeHead.getY();
+    switch (this.direction) {
+      case Direction.Up:
+        y--;
+        break;
+      case Direction.Down:
+        y++;
+        break;
+      case Direction.Left:
+        x--;
+        break;
+      case Direction.Right:
+        x++;
+        break;
+    }
+    return this.createHead(x, y, this.direction);
+  }
+
+  private createNewTail() {
+    const prevElement = this.snakeBody[this.snakeBody.length - 1];
+    const x = prevElement.getX();
+    const y = prevElement.getY();
+    const direction = prevElement.getDirection();
+    return this.createTail(x, y, direction);
+  }
+
+  private createNewBody() {
+    let prevDirection = this.snakeHead.getDirection();
+    let nextDirection = this.direction;
+    let nextX = this.snakeHead.getX();
+    let nextY = this.snakeHead.getY();
+    const newBody: DynamicObject[] = [];
+    newBody.push(this.createBody(nextX, nextY, prevDirection, nextDirection));
+
+    for (let i = 1; i < this.snakeBody.length; i++) {
+      nextX = this.snakeBody[i - 1].getX();
+      nextY = this.snakeBody[i - 1].getY();
+      prevDirection = this.snakeBody[i].getDirection();
+      nextDirection = this.snakeBody[i - 1].getDirection();
+      newBody.push(this.createBody(nextX, nextY, prevDirection, nextDirection));
+    }
+    return newBody;
   }
 
   private createHead(x: number, y: number, direction: Direction) {
