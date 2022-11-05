@@ -15,3 +15,7 @@ export const enum DrawableType {
   BodyAngle315,
   Apple,
 }
+
+export interface Drawable {
+  draw(ctx: CanvasRenderingContext2D): void;
+}

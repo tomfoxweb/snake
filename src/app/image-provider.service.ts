@@ -11,7 +11,7 @@ interface SnakeElement {
   providedIn: 'root',
 })
 export class ImageProviderService {
-  private images: Map<DrawableType, string>;
+  private images: Map<DrawableType, HTMLImageElement>;
   private elements: SnakeElement[];
   private readonly snakeSpriteUrl = 'assets/images/snake.png';
   private readonly snakeElementSize = 64;
@@ -44,7 +44,7 @@ export class ImageProviderService {
     canvas.width = this.snakeElementSize;
     canvas.height = this.snakeElementSize;
     const ctx = canvas.getContext('2d')!;
-    this.elements.forEach((x) => {
+    this.elements.forEach(async (x) => {
       const sx = x.col * this.snakeElementSize;
       const sy = x.row * this.snakeElementSize;
       const sw = this.snakeElementSize;
@@ -54,11 +54,12 @@ export class ImageProviderService {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(snakeImage, sx, sy, sw, sh, 0, 0, dw, dh);
       const url = canvas.toDataURL();
-      this.images.set(x.type, url);
+      const image = await this.loadImage(url);
+      this.images.set(x.type, image);
     });
   }
 
-  getImageUrl(type: DrawableType): string {
+  getImage(type: DrawableType): HTMLImageElement {
     return this.images.get(type)!;
   }
 
