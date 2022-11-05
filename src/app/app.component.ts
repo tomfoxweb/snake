@@ -1,4 +1,10 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  ViewChild,
+} from '@angular/core';
 import { Game } from './game/game';
 import { ImageProviderService } from './image-provider.service';
 
@@ -13,6 +19,34 @@ export class AppComponent implements AfterViewInit {
   private imagesLoaded = false;
 
   @ViewChild('canvasGame') canvasGame!: ElementRef<HTMLCanvasElement>;
+
+  @HostListener('window:keydown.ArrowUp', ['$event'])
+  handleArrowUp(event: KeyboardEvent) {
+    if (this.imagesLoaded && this.game) {
+      this.game.up();
+    }
+  }
+
+  @HostListener('window:keydown.ArrowDown', ['$event'])
+  handleArrowDown(event: KeyboardEvent) {
+    if (this.imagesLoaded && this.game) {
+      this.game.down();
+    }
+  }
+
+  @HostListener('window:keydown.ArrowRight', ['$event'])
+  handleArrowRight(event: KeyboardEvent) {
+    if (this.imagesLoaded && this.game) {
+      this.game.right();
+    }
+  }
+
+  @HostListener('window:keydown.ArrowLeft', ['$event'])
+  handleArrowLeft(event: KeyboardEvent) {
+    if (this.imagesLoaded && this.game) {
+      this.game.left();
+    }
+  }
 
   constructor(private imageProvider: ImageProviderService) {}
 

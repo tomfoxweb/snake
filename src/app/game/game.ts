@@ -12,6 +12,7 @@ export class Game {
   private snakeHead: DynamicObject;
   private snakeTail: DynamicObject;
   private snakeBody: DynamicObject[];
+  private direction: Direction;
 
   constructor(imageProvider: ImageProviderService, canvas: HTMLCanvasElement) {
     this.imageProvider = imageProvider;
@@ -23,6 +24,7 @@ export class Game {
     this.snakeHead = head;
     this.snakeBody = [body];
     this.snakeTail = tail;
+    this.direction = Direction.Right;
     this.startGameLoop();
   }
 
@@ -31,10 +33,54 @@ export class Game {
     this.snakeHead = head;
     this.snakeBody = [body];
     this.snakeTail = tail;
+    this.direction = Direction.Right;
+  }
+
+  up() {
+    if (this.direction === Direction.Left) {
+      this.direction = Direction.Up;
+    } else if (this.direction === Direction.Right) {
+      this.direction = Direction.Up;
+    }
+  }
+
+  down() {
+    if (this.direction === Direction.Left) {
+      this.direction = Direction.Down;
+    } else if (this.direction === Direction.Right) {
+      this.direction = Direction.Down;
+    }
+  }
+
+  left() {
+    if (this.direction === Direction.Up) {
+      this.direction = Direction.Left;
+    } else if (this.direction === Direction.Down) {
+      this.direction = Direction.Left;
+    }
+  }
+
+  right() {
+    if (this.direction === Direction.Up) {
+      this.direction = Direction.Right;
+    } else if (this.direction === Direction.Down) {
+      this.direction = Direction.Right;
+    }
   }
 
   private startGameLoop() {
-    this.draw();
+    window.setInterval(() => {
+      this.move();
+      this.draw();
+    }, 1000);
+  }
+
+  private move() {
+    this.snakeHead.move();
+    this.snakeBody.forEach((x) => {
+      x.move();
+    });
+    this.snakeTail.move();
   }
 
   private draw() {

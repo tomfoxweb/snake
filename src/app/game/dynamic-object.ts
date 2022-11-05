@@ -30,8 +30,20 @@ export class DynamicObject extends GameObject {
     return this.direction;
   }
 
-  move(sx: Step, sy: Step) {
-    this.setX(this.getX() + sx);
-    this.setY(this.getY() + sy);
+  move() {
+    switch (this.direction) {
+      case Direction.Up:
+        this.setY(this.getY() - 1);
+        break;
+      case Direction.Down:
+        this.setY(this.getY() + 1);
+        break;
+      case Direction.Left:
+        this.setX(this.getX() - 1);
+        break;
+      case Direction.Right:
+        this.setX(this.getX() + 1);
+        break;
+    }
   }
 }
