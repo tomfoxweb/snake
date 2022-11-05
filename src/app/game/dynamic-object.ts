@@ -31,7 +31,7 @@ export class DynamicObject extends GameObject {
   }
 
   move(sx: Step, sy: Step) {
-    this.x += sx * this.size;
-    this.y += sy * this.size;
+    this.setX(this.getX() + sx);
+    this.setY(this.getY() + sy);
   }
 }

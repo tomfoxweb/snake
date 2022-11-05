@@ -1,12 +1,65 @@
 import { ImageProviderService } from '../image-provider.service';
 import { DrawableType } from './drawable';
 import { Direction, DynamicObject } from './dynamic-object';
+import { GameObject } from './game-object';
 
 export class Game {
   private imageProvider: ImageProviderService;
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private rows: number;
+  private columns: number;
+  private snakeHead: DynamicObject;
+  private snakeTail: DynamicObject;
+  private snakeBody: DynamicObject[];
 
-  constructor(imageProvider: ImageProviderService) {
+  constructor(imageProvider: ImageProviderService, canvas: HTMLCanvasElement) {
     this.imageProvider = imageProvider;
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext('2d')!;
+    this.rows = Math.trunc(this.canvas.width / GameObject.size);
+    this.columns = Math.trunc(this.canvas.height / GameObject.size);
+    const [head, body, tail] = this.createSnake();
+    this.snakeHead = head;
+    this.snakeBody = [body];
+    this.snakeTail = tail;
+    this.startGameLoop();
+  }
+
+  restart() {
+    const [head, body, tail] = this.createSnake();
+    this.snakeHead = head;
+    this.snakeBody = [body];
+    this.snakeTail = tail;
+  }
+
+  private startGameLoop() {
+    this.draw();
+  }
+
+  private draw() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.snakeHead.draw(this.ctx);
+    this.snakeBody.forEach((body) => {
+      body.draw(this.ctx);
+    });
+    this.snakeTail.draw(this.ctx);
+  }
+
+  private createSnake(): [DynamicObject, DynamicObject, DynamicObject] {
+    const bodyX = Math.trunc(this.columns / 2);
+    const headX = bodyX + 1;
+    const tailX = bodyX - 1;
+    const snakeY = Math.trunc(this.rows / 2);
+    const head = this.createHead(headX, snakeY, Direction.Right);
+    const body = this.createBody(
+      bodyX,
+      snakeY,
+      Direction.Right,
+      Direction.Right
+    );
+    const tail = this.createTail(tailX, snakeY, Direction.Right);
+    return [head, body, tail];
   }
 
   private createHead(x: number, y: number, direction: Direction) {

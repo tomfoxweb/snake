@@ -38,24 +38,29 @@ export class ImageProviderService {
   }
 
   async makeGameImages() {
-    this.images.clear();
     const snakeImage = await this.loadImage(this.snakeSpriteUrl);
     const canvas = document.createElement('canvas');
     canvas.width = this.snakeElementSize;
     canvas.height = this.snakeElementSize;
     const ctx = canvas.getContext('2d')!;
-    this.elements.forEach(async (x) => {
+    const sw = this.snakeElementSize;
+    const sh = this.snakeElementSize;
+    const dw = this.snakeElementSize;
+    const dh = this.snakeElementSize;
+    const promises = this.elements.map((x) => {
       const sx = x.col * this.snakeElementSize;
       const sy = x.row * this.snakeElementSize;
-      const sw = this.snakeElementSize;
-      const sh = this.snakeElementSize;
-      const dw = this.snakeElementSize;
-      const dh = this.snakeElementSize;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(snakeImage, sx, sy, sw, sh, 0, 0, dw, dh);
       const url = canvas.toDataURL();
-      const image = await this.loadImage(url);
-      this.images.set(x.type, image);
+      return new Promise<[DrawableType, HTMLImageElement]>(async (resolve) => {
+        resolve([x.type, await this.loadImage(url)]);
+      });
+    });
+    const imagesTypes = await Promise.all(promises);
+    this.images.clear();
+    imagesTypes.forEach((x) => {
+      this.images.set(x[0], x[1]);
     });
   }
 
