@@ -1,7 +1,9 @@
 import { ImageProviderService } from '../image-provider.service';
+import { Rectangle } from './boundable';
 import { DrawableType } from './drawable';
 import { Direction, DynamicObject } from './dynamic-object';
 import { GameObject } from './game-object';
+import { intersect } from './intersect';
 
 export class Game {
   private imageProvider: ImageProviderService;
@@ -13,6 +15,8 @@ export class Game {
   private snakeTail: DynamicObject;
   private snakeBody: DynamicObject[];
   private direction: Direction;
+  private borders: Rectangle[];
+  private isGameFail = false;
 
   constructor(imageProvider: ImageProviderService, canvas: HTMLCanvasElement) {
     this.imageProvider = imageProvider;
@@ -20,7 +24,7 @@ export class Game {
     this.ctx = this.canvas.getContext('2d')!;
     this.rows = Math.trunc(this.canvas.height / GameObject.size);
     this.columns = Math.trunc(this.canvas.width / GameObject.size);
-    console.log(this.rows, this.columns);
+    this.borders = this.createBorders();
     const [head, body, tail] = this.createSnakeAtStart();
     this.snakeHead = head;
     this.snakeBody = body;
@@ -35,6 +39,7 @@ export class Game {
     this.snakeBody = body;
     this.snakeTail = tail;
     this.direction = Direction.Right;
+    this.isGameFail = false;
   }
 
   up() {
@@ -71,6 +76,9 @@ export class Game {
 
   private startGameLoop() {
     window.setInterval(() => {
+      if (this.isGameFail) {
+        return;
+      }
       this.move();
       this.draw();
     }, 200);
@@ -80,6 +88,7 @@ export class Game {
     this.moveTail();
     this.moveBody();
     this.moveHead();
+    this.checkForBorderHit();
   }
 
   private moveTail() {
@@ -136,6 +145,31 @@ export class Game {
     first.setDirection(this.direction);
   }
 
+  private checkForBorderHit() {
+    if (this.isBorderHit()) {
+      this.isGameFail = true;
+    }
+  }
+
+  private isBorderHit(): boolean {
+    for (const border of this.borders) {
+      if (intersect(this.snakeHead.getBounds(), border)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private showGameFail() {
+    this.ctx.save();
+    this.ctx.font = '36px monospace';
+    this.ctx.fillStyle = 'gold';
+    const x = this.canvas.width / 2 - 60;
+    const y = this.canvas.height / 2 - 20;
+    this.ctx.fillText('Fail', x, y);
+    this.ctx.restore();
+  }
+
   private draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.snakeHead.draw(this.ctx);
@@ -143,6 +177,9 @@ export class Game {
       body.draw(this.ctx);
     });
     this.snakeTail.draw(this.ctx);
+    if (this.isGameFail) {
+      this.showGameFail();
+    }
   }
 
   private createSnakeAtStart(): [
@@ -264,5 +301,23 @@ export class Game {
       case Direction.Down:
         return this.imageProvider.getImage(DrawableType.BodyAngle45);
     }
+  }
+
+  private createBorders(): Rectangle[] {
+    const top: Rectangle = { x: 0, y: -1000, w: this.canvas.width, h: 1000 };
+    const bottom: Rectangle = {
+      x: 0,
+      y: this.canvas.height,
+      w: this.canvas.width,
+      h: 1000,
+    };
+    const left: Rectangle = { x: -1000, y: 0, w: 1000, h: this.canvas.height };
+    const right: Rectangle = {
+      x: this.canvas.width,
+      y: 0,
+      w: 1000,
+      h: this.canvas.height,
+    };
+    return [top, right, bottom, left];
   }
 }
