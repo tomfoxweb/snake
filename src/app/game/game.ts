@@ -14,6 +14,7 @@ export class Game {
   private snakeHead: DynamicObject;
   private snakeTail: DynamicObject;
   private snakeBody: DynamicObject[];
+  private apples: GameObject[];
   private direction: Direction;
   private borders: Rectangle[];
   private isGameFail = false;
@@ -32,6 +33,7 @@ export class Game {
     this.snakeBody = body;
     this.snakeTail = tail;
     this.direction = Direction.Right;
+    this.apples = [this.createApple()];
     this.startGameLoop();
   }
 
@@ -44,6 +46,7 @@ export class Game {
     this.isGameFail = false;
     this.isPaused = false;
     this.prevDirectionHandled = true;
+    this.apples = [this.createApple()];
   }
 
   pause() {
@@ -230,6 +233,9 @@ export class Game {
       body.draw(this.ctx);
     });
     this.snakeTail.draw(this.ctx);
+    this.apples.forEach((x) => {
+      x.draw(this.ctx);
+    });
     if (this.isGameFail) {
       this.showGameFail();
     }
@@ -372,5 +378,52 @@ export class Game {
       h: this.canvas.height,
     };
     return [top, right, bottom, left];
+  }
+
+  private createApple(): GameObject {
+    const freeCells = this.findFreeCells();
+    const randIndex = Math.trunc(Math.random() * freeCells.length);
+    const [appleY, appleX] = freeCells[randIndex];
+    const image = this.imageProvider.getImage(DrawableType.Apple);
+    const apple = new GameObject(appleX, appleY, image);
+    return apple;
+  }
+
+  private findFreeCells() {
+    const freeCells: [number, number][] = [];
+    for (let row = 2; row < this.rows - 1; row++) {
+      for (let col = 2; col < this.columns - 1; col++) {
+        freeCells.push([row, col]);
+      }
+    }
+    const headX = this.snakeHead.getX();
+    const headY = this.snakeHead.getY();
+    const headIndex = freeCells.findIndex((x) => {
+      x[0] === headY && x[1] === headX;
+    });
+    if (headIndex >= 0) {
+      freeCells.splice(headIndex, 1);
+    }
+
+    this.snakeBody.forEach((body) => {
+      const bodyX = body.getX();
+      const bodyY = body.getY();
+      const bodyIndex = freeCells.findIndex((x) => {
+        x[0] === bodyY && x[1] === bodyX;
+      });
+      if (bodyIndex > 0) {
+        freeCells.splice(bodyIndex, 1);
+      }
+    });
+
+    const tailX = this.snakeTail.getX();
+    const tailY = this.snakeTail.getY();
+    const tailIndex = freeCells.findIndex((x) => {
+      x[0] === tailX && x[1] === tailY;
+    });
+    if (tailIndex >= 0) {
+      freeCells.splice(tailIndex, 1);
+    }
+    return freeCells;
   }
 }
