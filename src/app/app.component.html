@@ -1,7 +1,7 @@
 <div class="content-container">
   <div class="toolbar-container">
-    <button>Restart</button>
-    <button>Pause</button>
+    <button (click)="restart()">Restart</button>
+    <button (click)="pause()">{{ pauseCaption }}</button>
     <label for="outputSnakeLength">
       Snake length:
       <output id="outputSnakeLength">5</output>

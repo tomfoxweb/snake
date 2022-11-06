@@ -17,6 +17,7 @@ export class Game {
   private direction: Direction;
   private borders: Rectangle[];
   private isGameFail = false;
+  private isPaused = false;
 
   constructor(imageProvider: ImageProviderService, canvas: HTMLCanvasElement) {
     this.imageProvider = imageProvider;
@@ -40,6 +41,15 @@ export class Game {
     this.snakeTail = tail;
     this.direction = Direction.Right;
     this.isGameFail = false;
+    this.isPaused = false;
+  }
+
+  pause() {
+    this.isPaused = true;
+  }
+
+  resume() {
+    this.isPaused = false;
   }
 
   up() {
@@ -76,7 +86,7 @@ export class Game {
 
   private startGameLoop() {
     window.setInterval(() => {
-      if (this.isGameFail) {
+      if (this.isGameFail || this.isPaused) {
         return;
       }
       this.move();

@@ -15,8 +15,10 @@ import { ImageProviderService } from './image-provider.service';
 })
 export class AppComponent implements AfterViewInit {
   title = 'snake';
+  pauseCaption = 'Pause';
   private game!: Game;
   private imagesLoaded = false;
+  private isPaused = false;
 
   @ViewChild('canvasGame') canvasGame!: ElementRef<HTMLCanvasElement>;
 
@@ -63,9 +65,25 @@ export class AppComponent implements AfterViewInit {
   }
 
   restart() {
-    if (!this.imagesLoaded) {
+    if (!this.imagesLoaded || !this.game) {
       return;
     }
     this.game.restart();
+    this.isPaused = false;
+  }
+
+  pause() {
+    if (!this.imagesLoaded || !this.game) {
+      return;
+    }
+    if (this.isPaused) {
+      this.game.resume();
+      this.isPaused = false;
+      this.pauseCaption = 'Pause';
+    } else {
+      this.game.pause();
+      this.isPaused = true;
+      this.pauseCaption = 'Resume';
+    }
   }
 }
