@@ -2,7 +2,8 @@ import { Boundable, Rectangle } from './boundable';
 import { Drawable } from './drawable';
 
 export class GameObject implements Boundable, Drawable {
-  public static readonly size = 64;
+  public static readonly size = 32;
+  private static readonly scale = GameObject.size - 2;
   private x: number;
   private y: number;
   private image: HTMLImageElement;
@@ -39,10 +40,10 @@ export class GameObject implements Boundable, Drawable {
 
   getBounds(): Readonly<Rectangle> {
     return {
-      x: this.x * GameObject.size,
-      y: this.y * GameObject.size,
-      w: GameObject.size,
-      h: GameObject.size,
+      x: this.x * GameObject.scale,
+      y: this.y * GameObject.scale,
+      w: GameObject.scale - 2,
+      h: GameObject.scale - 2,
     };
   }
 

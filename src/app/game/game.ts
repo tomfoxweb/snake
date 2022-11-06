@@ -18,6 +18,7 @@ export class Game {
   private borders: Rectangle[];
   private isGameFail = false;
   private isPaused = false;
+  private prevDirectionHandled = true;
 
   constructor(imageProvider: ImageProviderService, canvas: HTMLCanvasElement) {
     this.imageProvider = imageProvider;
@@ -42,46 +43,65 @@ export class Game {
     this.direction = Direction.Right;
     this.isGameFail = false;
     this.isPaused = false;
+    this.prevDirectionHandled = true;
   }
 
   pause() {
     this.isPaused = true;
+    this.prevDirectionHandled = true;
   }
 
   resume() {
     this.isPaused = false;
+    this.prevDirectionHandled = true;
   }
 
   up() {
+    if (!this.prevDirectionHandled) {
+      return;
+    }
     if (this.direction === Direction.Left) {
       this.direction = Direction.Up;
     } else if (this.direction === Direction.Right) {
       this.direction = Direction.Up;
     }
+    this.prevDirectionHandled = false;
   }
 
   down() {
+    if (!this.prevDirectionHandled) {
+      return;
+    }
     if (this.direction === Direction.Left) {
       this.direction = Direction.Down;
     } else if (this.direction === Direction.Right) {
       this.direction = Direction.Down;
     }
+    this.prevDirectionHandled = false;
   }
 
   left() {
+    if (!this.prevDirectionHandled) {
+      return;
+    }
     if (this.direction === Direction.Up) {
       this.direction = Direction.Left;
     } else if (this.direction === Direction.Down) {
       this.direction = Direction.Left;
     }
+    this.prevDirectionHandled = false;
   }
 
   right() {
+    if (!this.prevDirectionHandled) {
+      return;
+    }
     if (this.direction === Direction.Up) {
       this.direction = Direction.Right;
     } else if (this.direction === Direction.Down) {
       this.direction = Direction.Right;
     }
+    this.prevDirectionHandled = false;
   }
 
   private startGameLoop() {
@@ -91,7 +111,8 @@ export class Game {
       }
       this.move();
       this.draw();
-    }, 200);
+      this.prevDirectionHandled = true;
+    }, 100);
   }
 
   private move() {
@@ -99,6 +120,7 @@ export class Game {
     this.moveBody();
     this.moveHead();
     this.checkForBorderHit();
+    this.checkForBodyHit();
   }
 
   private moveTail() {
@@ -166,6 +188,27 @@ export class Game {
       if (intersect(this.snakeHead.getBounds(), border)) {
         return true;
       }
+    }
+    return false;
+  }
+
+  private checkForBodyHit() {
+    if (this.isBodyHit()) {
+      this.isGameFail = true;
+    }
+  }
+
+  private isBodyHit(): boolean {
+    const headBounds = this.snakeHead.getBounds();
+    for (let i = 0; i < this.snakeBody.length; i++) {
+      if (intersect(headBounds, this.snakeBody[i].getBounds())) {
+        console.log(headBounds);
+        console.log(this.snakeBody[i].getBounds());
+        return true;
+      }
+    }
+    if (intersect(headBounds, this.snakeTail.getBounds())) {
+      return true;
     }
     return false;
   }
