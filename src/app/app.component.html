@@ -2,9 +2,9 @@
   <div class="toolbar-container">
     <button (click)="restart()">Restart</button>
     <button (click)="pause()">{{ pauseCaption }}</button>
-    <label for="outputSnakeLength">
-      Snake length:
-      <output id="outputSnakeLength">{{ snakeLength }}</output>
+    <label for="outputScore">
+      Score:
+      <output id="outputScore">{{ score }}</output>
     </label>
   </div>
   <canvas #canvasGame class="canvas-game"></canvas>

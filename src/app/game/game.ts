@@ -19,10 +19,10 @@ export class Game {
   private apples: GameObject[];
   private direction: Direction;
   private borders: Rectangle[];
-  private isGameFail = false;
+  private isGameOver = false;
   private isPaused = false;
   private prevDirectionHandled = true;
-  private snakeLength: number;
+  private score: number;
 
   constructor(
     imageProvider: ImageProviderService,
@@ -42,8 +42,8 @@ export class Game {
     this.snakeTail = tail;
     this.direction = Direction.Right;
     this.apples = [this.createApple()];
-    this.snakeLength = 3;
-    this.app.showSnakeLength(this.snakeLength);
+    this.score = 0;
+    this.app.showScore(this.score);
     this.startGameLoop();
   }
 
@@ -53,11 +53,11 @@ export class Game {
     this.snakeBody = body;
     this.snakeTail = tail;
     this.direction = Direction.Right;
-    this.isGameFail = false;
+    this.isGameOver = false;
     this.isPaused = false;
     this.prevDirectionHandled = true;
-    this.snakeLength = 3;
-    this.app.showSnakeLength(this.snakeLength);
+    this.score = 0;
+    this.app.showScore(this.score);
     this.apples = [this.createApple()];
   }
 
@@ -72,7 +72,7 @@ export class Game {
   }
 
   up() {
-    if (this.isGameFail || this.isPaused) {
+    if (this.isGameOver || this.isPaused) {
       return;
     }
     if (!this.prevDirectionHandled) {
@@ -87,7 +87,7 @@ export class Game {
   }
 
   down() {
-    if (this.isGameFail || this.isPaused) {
+    if (this.isGameOver || this.isPaused) {
       return;
     }
     if (!this.prevDirectionHandled) {
@@ -102,7 +102,7 @@ export class Game {
   }
 
   left() {
-    if (this.isGameFail || this.isPaused) {
+    if (this.isGameOver || this.isPaused) {
       return;
     }
     if (!this.prevDirectionHandled) {
@@ -117,7 +117,7 @@ export class Game {
   }
 
   right() {
-    if (this.isGameFail || this.isPaused) {
+    if (this.isGameOver || this.isPaused) {
       return;
     }
     if (!this.prevDirectionHandled) {
@@ -133,13 +133,13 @@ export class Game {
 
   private startGameLoop() {
     window.setInterval(() => {
-      if (this.isGameFail || this.isPaused) {
+      if (this.isGameOver || this.isPaused) {
         return;
       }
       this.move();
       this.draw();
       this.prevDirectionHandled = true;
-    }, 100);
+    }, 500);
   }
 
   private move() {
@@ -207,7 +207,7 @@ export class Game {
 
   private checkForBorderHit() {
     if (this.isBorderHit()) {
-      this.isGameFail = true;
+      this.isGameOver = true;
     }
   }
 
@@ -222,7 +222,7 @@ export class Game {
 
   private checkForBodyHit() {
     if (this.isBodyHit()) {
-      this.isGameFail = true;
+      this.isGameOver = true;
     }
   }
 
@@ -230,8 +230,6 @@ export class Game {
     const headBounds = this.snakeHead.getBounds();
     for (let i = 0; i < this.snakeBody.length; i++) {
       if (intersect(headBounds, this.snakeBody[i].getBounds())) {
-        console.log(headBounds);
-        console.log(this.snakeBody[i].getBounds());
         return true;
       }
     }
@@ -246,8 +244,8 @@ export class Game {
       if (intersect(apple.getBounds(), this.snakeHead.getBounds())) {
         this.apples.splice(index, 1);
         this.growSnake();
-        this.snakeLength++;
-        this.app.showSnakeLength(this.snakeLength);
+        this.score++;
+        this.app.showScore(this.score);
         this.apples.push(this.createApple());
         return;
       }
@@ -266,29 +264,29 @@ export class Game {
     let newTailY = prevTailY;
     switch (tailDirection) {
       case Direction.Up:
-        newTailY--;
-        break;
-      case Direction.Down:
         newTailY++;
         break;
+      case Direction.Down:
+        newTailY--;
+        break;
       case Direction.Left:
-        newTailX--;
+        newTailX++;
         break;
       case Direction.Right:
-        newTailX++;
+        newTailX--;
         break;
     }
     this.snakeTail.setX(newTailX);
     this.snakeTail.setY(newTailY);
   }
 
-  private showGameFail() {
+  private showGameOverMessage() {
     this.ctx.save();
     this.ctx.font = '36px monospace';
-    this.ctx.fillStyle = 'gold';
-    const x = this.canvas.width / 2 - 60;
+    this.ctx.fillStyle = 'brown';
+    const x = this.canvas.width / 2 - 100;
     const y = this.canvas.height / 2 - 20;
-    this.ctx.fillText('Fail', x, y);
+    this.ctx.fillText('Game Over!', x, y);
     this.ctx.restore();
   }
 
@@ -302,8 +300,8 @@ export class Game {
     this.apples.forEach((x) => {
       x.draw(this.ctx);
     });
-    if (this.isGameFail) {
-      this.showGameFail();
+    if (this.isGameOver) {
+      this.showGameOverMessage();
     }
   }
 

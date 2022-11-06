@@ -16,7 +16,7 @@ import { ImageProviderService } from './image-provider.service';
 export class AppComponent implements AfterViewInit {
   title = 'snake';
   pauseCaption = 'Pause';
-  snakeLength = 3;
+  score = 0;
   private game!: Game;
   private imagesLoaded = false;
   private isPaused = false;
@@ -88,7 +88,7 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  showSnakeLength(length: number) {
-    this.snakeLength = length;
+  showScore(length: number) {
+    this.score = length;
   }
 }
