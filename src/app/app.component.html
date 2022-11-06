@@ -4,7 +4,7 @@
     <button (click)="pause()">{{ pauseCaption }}</button>
     <label for="outputSnakeLength">
       Snake length:
-      <output id="outputSnakeLength">5</output>
+      <output id="outputSnakeLength">{{ snakeLength }}</output>
     </label>
   </div>
   <canvas #canvasGame class="canvas-game"></canvas>

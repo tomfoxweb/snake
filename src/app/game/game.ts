@@ -1,3 +1,4 @@
+import { AppComponent } from '../app.component';
 import { ImageProviderService } from '../image-provider.service';
 import { Rectangle } from './boundable';
 import { DrawableType } from './drawable';
@@ -8,6 +9,7 @@ import { intersect } from './intersect';
 export class Game {
   private imageProvider: ImageProviderService;
   private canvas: HTMLCanvasElement;
+  private app: AppComponent;
   private ctx: CanvasRenderingContext2D;
   private rows: number;
   private columns: number;
@@ -20,10 +22,16 @@ export class Game {
   private isGameFail = false;
   private isPaused = false;
   private prevDirectionHandled = true;
+  private snakeLength: number;
 
-  constructor(imageProvider: ImageProviderService, canvas: HTMLCanvasElement) {
+  constructor(
+    imageProvider: ImageProviderService,
+    canvas: HTMLCanvasElement,
+    app: AppComponent
+  ) {
     this.imageProvider = imageProvider;
     this.canvas = canvas;
+    this.app = app;
     this.ctx = this.canvas.getContext('2d')!;
     this.rows = Math.trunc(this.canvas.height / GameObject.size);
     this.columns = Math.trunc(this.canvas.width / GameObject.size);
@@ -34,6 +42,8 @@ export class Game {
     this.snakeTail = tail;
     this.direction = Direction.Right;
     this.apples = [this.createApple()];
+    this.snakeLength = 3;
+    this.app.showSnakeLength(this.snakeLength);
     this.startGameLoop();
   }
 
@@ -46,6 +56,8 @@ export class Game {
     this.isGameFail = false;
     this.isPaused = false;
     this.prevDirectionHandled = true;
+    this.snakeLength = 3;
+    this.app.showSnakeLength(this.snakeLength);
     this.apples = [this.createApple()];
   }
 
@@ -222,6 +234,8 @@ export class Game {
       if (intersect(apple.getBounds(), this.snakeHead.getBounds())) {
         this.apples.splice(index, 1);
         this.growSnake();
+        this.snakeLength++;
+        this.app.showSnakeLength(this.snakeLength);
         this.apples.push(this.createApple());
         return;
       }
@@ -288,13 +302,11 @@ export class Game {
   ] {
     const bodyX = Math.trunc(this.columns / 2);
     const headX = bodyX + 1;
-    const tailX = bodyX - 3;
+    const tailX = bodyX - 1;
     const snakeY = Math.trunc(this.rows / 2);
     const head = this.createHead(headX, snakeY, Direction.Right);
     const body = [
       this.createBody(bodyX, snakeY, Direction.Right, Direction.Right),
-      this.createBody(bodyX - 1, snakeY, Direction.Right, Direction.Right),
-      this.createBody(bodyX - 2, snakeY, Direction.Right, Direction.Right),
     ];
     const tail = this.createTail(tailX, snakeY, Direction.Right);
     return [head, body, tail];
