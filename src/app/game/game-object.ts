@@ -21,12 +21,20 @@ export class GameObject implements Boundable, Drawable {
     return this.y;
   }
 
-  protected setX(x: number) {
+  public setX(x: number) {
     this.x = x;
   }
 
-  protected setY(y: number) {
+  public setY(y: number) {
     this.y = y;
+  }
+
+  public setImage(image: HTMLImageElement) {
+    this.image = image;
+  }
+
+  public getImage(): Readonly<HTMLImageElement> {
+    return this.image;
   }
 
   getBounds(): Readonly<Rectangle> {

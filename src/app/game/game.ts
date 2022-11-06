@@ -18,8 +18,9 @@ export class Game {
     this.imageProvider = imageProvider;
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d')!;
-    this.rows = Math.trunc(this.canvas.width / GameObject.size);
-    this.columns = Math.trunc(this.canvas.height / GameObject.size);
+    this.rows = Math.trunc(this.canvas.height / GameObject.size);
+    this.columns = Math.trunc(this.canvas.width / GameObject.size);
+    console.log(this.rows, this.columns);
     const [head, body, tail] = this.createSnakeAtStart();
     this.snakeHead = head;
     this.snakeBody = body;
@@ -76,7 +77,63 @@ export class Game {
   }
 
   private move() {
-    this.createNewSnake();
+    this.moveTail();
+    this.moveBody();
+    this.moveHead();
+  }
+
+  private moveTail() {
+    const lastBodyElement = this.snakeBody[this.snakeBody.length - 1];
+    const direction = lastBodyElement.getDirection();
+    const x = lastBodyElement.getX();
+    const y = lastBodyElement.getY();
+    const image = this.getTailImage(direction);
+    this.snakeTail.setDirection(direction);
+    this.snakeTail.setX(x);
+    this.snakeTail.setY(y);
+    this.snakeTail.setImage(image);
+  }
+
+  private moveHead() {
+    let x = this.snakeHead.getX();
+    let y = this.snakeHead.getY();
+    switch (this.direction) {
+      case Direction.Up:
+        y--;
+        break;
+      case Direction.Down:
+        y++;
+        break;
+      case Direction.Left:
+        x--;
+        break;
+      case Direction.Right:
+        x++;
+        break;
+    }
+    const image = this.getHeadImage(this.direction);
+    this.snakeHead.setX(x);
+    this.snakeHead.setY(y);
+    this.snakeHead.setDirection(this.direction);
+    this.snakeHead.setImage(image);
+  }
+
+  private moveBody() {
+    for (let i = this.snakeBody.length - 1; i > 0; i--) {
+      const curr = this.snakeBody[i];
+      const next = this.snakeBody[i - 1];
+      curr.setX(next.getX());
+      curr.setY(next.getY());
+      const image = this.getBodyImage(curr.getDirection(), next.getDirection());
+      curr.setImage(image);
+      curr.setDirection(next.getDirection());
+    }
+    const first = this.snakeBody[0];
+    first.setX(this.snakeHead.getX());
+    first.setY(this.snakeHead.getY());
+    const image = this.getBodyImage(first.getDirection(), this.direction);
+    first.setImage(image);
+    first.setDirection(this.direction);
   }
 
   private draw() {
@@ -107,116 +164,58 @@ export class Game {
     return [head, body, tail];
   }
 
-  private createNewSnake() {
-    const newHead = this.createNewHead();
-    const newBody = this.createNewBody();
-    const newTail = this.createNewTail();
-    this.snakeHead = newHead;
-    this.snakeBody = newBody;
-    this.snakeTail = newTail;
-  }
-
-  private createNewHead() {
-    let x = this.snakeHead.getX();
-    let y = this.snakeHead.getY();
-    switch (this.direction) {
-      case Direction.Up:
-        y--;
-        break;
-      case Direction.Down:
-        y++;
-        break;
-      case Direction.Left:
-        x--;
-        break;
-      case Direction.Right:
-        x++;
-        break;
-    }
-    return this.createHead(x, y, this.direction);
-  }
-
-  private createNewTail() {
-    const prevElement = this.snakeBody[this.snakeBody.length - 1];
-    const x = prevElement.getX();
-    const y = prevElement.getY();
-    const direction = prevElement.getDirection();
-    return this.createTail(x, y, direction);
-  }
-
-  private createNewBody() {
-    let prevDirection = this.snakeHead.getDirection();
-    let nextDirection = this.direction;
-    let nextX = this.snakeHead.getX();
-    let nextY = this.snakeHead.getY();
-    const newBody: DynamicObject[] = [];
-    newBody.push(this.createBody(nextX, nextY, prevDirection, nextDirection));
-
-    for (let i = 1; i < this.snakeBody.length; i++) {
-      nextX = this.snakeBody[i - 1].getX();
-      nextY = this.snakeBody[i - 1].getY();
-      prevDirection = this.snakeBody[i].getDirection();
-      nextDirection = this.snakeBody[i - 1].getDirection();
-      newBody.push(this.createBody(nextX, nextY, prevDirection, nextDirection));
-    }
-    return newBody;
-  }
-
   private createHead(x: number, y: number, direction: Direction) {
-    let image: HTMLImageElement;
+    const image = this.getHeadImage(direction);
+    return new DynamicObject(x, y, image, direction);
+  }
+
+  private getHeadImage(direction: Direction) {
     switch (direction) {
       case Direction.Up:
-        image = this.imageProvider.getImage(DrawableType.HeadUp);
-        break;
+        return this.imageProvider.getImage(DrawableType.HeadUp);
       case Direction.Down:
-        image = this.imageProvider.getImage(DrawableType.HeadDown);
-        break;
+        return this.imageProvider.getImage(DrawableType.HeadDown);
       case Direction.Left:
-        image = this.imageProvider.getImage(DrawableType.HeadLeft);
-        break;
+        return this.imageProvider.getImage(DrawableType.HeadLeft);
       case Direction.Right:
-        image = this.imageProvider.getImage(DrawableType.HeadRight);
-        break;
+        return this.imageProvider.getImage(DrawableType.HeadRight);
     }
-    return new DynamicObject(x, y, image, direction);
   }
 
   private createTail(x: number, y: number, direction: Direction) {
-    let image: HTMLImageElement;
-    switch (direction) {
-      case Direction.Up:
-        image = this.imageProvider.getImage(DrawableType.TailUp);
-        break;
-      case Direction.Down:
-        image = this.imageProvider.getImage(DrawableType.TailDown);
-        break;
-      case Direction.Left:
-        image = this.imageProvider.getImage(DrawableType.TailLeft);
-        break;
-      case Direction.Right:
-        image = this.imageProvider.getImage(DrawableType.TailRight);
-        break;
-    }
+    const image = this.getTailImage(direction);
     return new DynamicObject(x, y, image, direction);
   }
 
-  private createBody(x: number, y: number, prevDir: Direction, dir: Direction) {
-    let image: HTMLImageElement;
-    switch (prevDir) {
+  private getTailImage(direction: Direction) {
+    switch (direction) {
       case Direction.Up:
-        image = this.getBodyImagePrevDirectionUp(dir);
-        break;
+        return this.imageProvider.getImage(DrawableType.TailUp);
       case Direction.Down:
-        image = this.getBodyImagePrevDirectionDown(dir);
-        break;
+        return this.imageProvider.getImage(DrawableType.TailDown);
       case Direction.Left:
-        image = this.getBodyImagePrevDirectionLeft(dir);
-        break;
+        return this.imageProvider.getImage(DrawableType.TailLeft);
       case Direction.Right:
-        image = this.getBodyImagePrevDirectionRight(dir);
-        break;
+        return this.imageProvider.getImage(DrawableType.TailRight);
     }
+  }
+
+  private createBody(x: number, y: number, prevDir: Direction, dir: Direction) {
+    const image = this.getBodyImage(prevDir, dir);
     return new DynamicObject(x, y, image, dir);
+  }
+
+  private getBodyImage(prevDirection: Direction, direction: Direction) {
+    switch (prevDirection) {
+      case Direction.Up:
+        return this.getBodyImagePrevDirectionUp(direction);
+      case Direction.Down:
+        return this.getBodyImagePrevDirectionDown(direction);
+      case Direction.Left:
+        return this.getBodyImagePrevDirectionLeft(direction);
+      case Direction.Right:
+        return this.getBodyImagePrevDirectionRight(direction);
+    }
   }
 
   private getBodyImagePrevDirectionUp(direction: Direction) {
