@@ -20,6 +20,10 @@ export class AppComponent implements AfterViewInit {
   private game!: Game;
   private imagesLoaded = false;
   private isPaused = false;
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private touchEndX = 0;
+  private touchEndY = 0;
 
   @ViewChild('canvasGame') canvasGame!: ElementRef<HTMLCanvasElement>;
 
@@ -48,6 +52,25 @@ export class AppComponent implements AfterViewInit {
   handleArrowLeft(event: KeyboardEvent) {
     if (this.imagesLoaded && this.game) {
       this.game.left();
+    }
+  }
+
+  @HostListener('window:touchstart', ['$event'])
+  handleTouchDown(event: TouchEvent) {
+    if (event.changedTouches.length > 0) {
+      const x = event.changedTouches[0].clientX;
+      const y = event.changedTouches[0].clientY;
+      this.setStartTouchPosition(x, y);
+    }
+  }
+
+  @HostListener('window:touchend', ['$event'])
+  handleTouchEnd(event: TouchEvent) {
+    if (event.changedTouches.length > 0) {
+      const x = event.changedTouches[0].clientX;
+      const y = event.changedTouches[0].clientY;
+      this.setEndTouchPosition(x, y);
+      this.processPointerMove();
     }
   }
 
@@ -90,5 +113,37 @@ export class AppComponent implements AfterViewInit {
 
   showScore(length: number) {
     this.score = length;
+  }
+
+  private setStartTouchPosition(x: number, y: number): void {
+    this.touchStartX = x;
+    this.touchStartY = y;
+  }
+
+  private setEndTouchPosition(x: number, y: number): void {
+    this.touchEndX = x;
+    this.touchEndY = y;
+  }
+
+  private processPointerMove(): void {
+    const sx = Math.abs(this.touchEndX - this.touchStartX);
+    const sy = Math.abs(this.touchEndY - this.touchStartY);
+    if (sx + sy < 10) {
+      return;
+    }
+    if (sx > sy) {
+      if (this.touchEndX > this.touchStartX) {
+        this.game.right();
+      } else {
+        this.game.left();
+      }
+    } else {
+      if (this.touchEndY > this.touchStartY) {
+        this.game.down();
+      } else {
+        this.game.up();
+      }
+      this.game.up();
+    }
   }
 }
