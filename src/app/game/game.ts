@@ -124,6 +124,7 @@ export class Game {
     this.moveHead();
     this.checkForBorderHit();
     this.checkForBodyHit();
+    this.checkForAppleHit();
   }
 
   private moveTail() {
@@ -214,6 +215,45 @@ export class Game {
       return true;
     }
     return false;
+  }
+
+  private checkForAppleHit() {
+    for (const [index, apple] of this.apples.entries()) {
+      if (intersect(apple.getBounds(), this.snakeHead.getBounds())) {
+        this.apples.splice(index, 1);
+        this.growSnake();
+        this.apples.push(this.createApple());
+        return;
+      }
+    }
+  }
+
+  private growSnake() {
+    const prevTailX = this.snakeTail.getX();
+    const prevTailY = this.snakeTail.getY();
+    const tailDirection = this.snakeTail.getDirection();
+    const image = this.getBodyImage(tailDirection, tailDirection);
+    this.snakeBody.push(
+      new DynamicObject(prevTailX, prevTailY, image, tailDirection)
+    );
+    let newTailX = prevTailX;
+    let newTailY = prevTailY;
+    switch (tailDirection) {
+      case Direction.Up:
+        newTailY--;
+        break;
+      case Direction.Down:
+        newTailY++;
+        break;
+      case Direction.Left:
+        newTailX--;
+        break;
+      case Direction.Right:
+        newTailX++;
+        break;
+    }
+    this.snakeTail.setX(newTailX);
+    this.snakeTail.setY(newTailY);
   }
 
   private showGameFail() {
