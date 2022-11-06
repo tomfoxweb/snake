@@ -72,6 +72,9 @@ export class Game {
   }
 
   up() {
+    if (this.isGameFail || this.isPaused) {
+      return;
+    }
     if (!this.prevDirectionHandled) {
       return;
     }
@@ -84,6 +87,9 @@ export class Game {
   }
 
   down() {
+    if (this.isGameFail || this.isPaused) {
+      return;
+    }
     if (!this.prevDirectionHandled) {
       return;
     }
@@ -96,6 +102,9 @@ export class Game {
   }
 
   left() {
+    if (this.isGameFail || this.isPaused) {
+      return;
+    }
     if (!this.prevDirectionHandled) {
       return;
     }
@@ -108,6 +117,9 @@ export class Game {
   }
 
   right() {
+    if (this.isGameFail || this.isPaused) {
+      return;
+    }
     if (!this.prevDirectionHandled) {
       return;
     }
@@ -443,8 +455,8 @@ export class Game {
 
   private findFreeCells() {
     const freeCells: [number, number][] = [];
-    for (let row = 2; row < this.rows - 1; row++) {
-      for (let col = 2; col < this.columns - 1; col++) {
+    for (let row = 2; row < this.rows - 2; row++) {
+      for (let col = 2; col < this.columns - 2; col++) {
         freeCells.push([row, col]);
       }
     }
