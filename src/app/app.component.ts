@@ -77,13 +77,14 @@ export class AppComponent implements AfterViewInit {
   constructor(private imageProvider: ImageProviderService) {}
 
   async ngAfterViewInit() {
-    await this.imageProvider.makeGameImages();
     const canvas = this.canvasGame.nativeElement;
     const css = window.getComputedStyle(canvas);
     const width = Number.parseInt(css.width);
     const height = Number.parseInt(css.height);
     canvas.width = width;
     canvas.height = height;
+    this.showLoadingText();
+    await this.imageProvider.makeGameImages();
     this.imagesLoaded = true;
     this.game = new Game(this.imageProvider, canvas, this);
     this.pause();
@@ -147,5 +148,17 @@ export class AppComponent implements AfterViewInit {
       }
       this.game.up();
     }
+  }
+
+  private showLoadingText() {
+    const canvas = this.canvasGame.nativeElement;
+    const ctx = canvas.getContext('2d')!;
+    ctx.save();
+    ctx.font = '36px monospace';
+    ctx.fillStyle = 'brown';
+    const x = canvas.width / 2 - 90;
+    const y = canvas.height / 2 - 20;
+    ctx.fillText('Loading...', x, y);
+    ctx.restore();
   }
 }
