@@ -86,6 +86,7 @@ export class AppComponent implements AfterViewInit {
     canvas.height = height;
     this.imagesLoaded = true;
     this.game = new Game(this.imageProvider, canvas, this);
+    this.pause();
   }
 
   restart() {
@@ -94,6 +95,7 @@ export class AppComponent implements AfterViewInit {
     }
     this.game.restart();
     this.isPaused = false;
+    this.pauseCaption = 'Pause';
   }
 
   pause() {
