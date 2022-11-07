@@ -425,18 +425,18 @@ export class Game {
   }
 
   private createBorders(): Rectangle[] {
-    const top: Rectangle = { x: 0, y: -1000, w: this.canvas.width, h: 1000 };
+    const top: Rectangle = { x: 0, y: -1000, w: this.canvas.width, h: 990 };
     const bottom: Rectangle = {
       x: 0,
       y: this.canvas.height,
       w: this.canvas.width,
-      h: 1000,
+      h: 990,
     };
-    const left: Rectangle = { x: -1000, y: 0, w: 1000, h: this.canvas.height };
+    const left: Rectangle = { x: -1000, y: 0, w: 990, h: this.canvas.height };
     const right: Rectangle = {
       x: this.canvas.width,
       y: 0,
-      w: 1000,
+      w: 990,
       h: this.canvas.height,
     };
     return [top, right, bottom, left];
